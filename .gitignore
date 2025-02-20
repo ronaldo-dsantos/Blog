@@ -1,0 +1,30 @@
+# Pastas do build
+bin/
+obj/
+out/
+
+# Configurações de usuário e IDE
+.vscode/
+*.vs/
+*.user
+*.suo
+*.cache
+*.csproj.user
+
+# Dependências
+packages/
+node_modules/
+
+# Logs, backups e arquivos temporários
+logs/
+*.log
+*.bak
+*.tmp
+
+# Configurações locais
+.env
+appsettings.*.json
+secrets.json
+
+# Publicação
+publish/
