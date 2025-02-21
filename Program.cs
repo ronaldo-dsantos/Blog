@@ -23,6 +23,8 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+app.UseStaticFiles();
+
 app.Run();
 
 void LoadConfiguration(WebApplication app)
