@@ -23,7 +23,6 @@ namespace Blog.Controllers
             {
                 return StatusCode(500, new ResultViewModel<List<Category>>("05x04 - Falha interna no servidor"));
             }
-
         }
 
         [HttpGet("v1/categories/{id:int}")]
@@ -40,7 +39,6 @@ namespace Blog.Controllers
             catch
             {
                 return StatusCode(500, new ResultViewModel<Category>("05x05 - Falha interna no servidor"));
-
             }
         }
 
@@ -124,7 +122,6 @@ namespace Blog.Controllers
             catch
             {
                 return StatusCode(500, new ResultViewModel<Category>("05x12 - Falha interna no servidor"));
-
             }
         }
     }
