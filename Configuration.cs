@@ -2,15 +2,15 @@
 {
     public static class Configuration
     {
-        public static string JwtKey = "NiObng1EJnw46scPHaNeZA1p5kjxsZN01LQdJBYTTFo=";
-        public static string ApiKeyName = "api_key";
-        public static string ApiKey = "curso_api_xEuey0jQkM0WNCmshPrkmA==";
-        public static SmtpConfiguration Smtp = new();
+        public static string? JwtKey { get; set; }
+        public static string? ApiKeyName { get; set; }
+        public static string? ApiKey { get; set; }
+        public static SmtpConfiguration? Smtp { get; set; }
 
         public class SmtpConfiguration
         {
             public string? Host { get; set; }
-            public int Port { get; set; } = 25;
+            public int Port { get; set; } 
             public string? UserName { get; set; }
             public string? Password { get; set; }
         }
