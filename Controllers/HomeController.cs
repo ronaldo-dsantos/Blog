@@ -6,7 +6,7 @@ namespace Blog.Controllers
     [Route("")]
     public class HomeController : ControllerBase
     {
-        // health check
+        // Controller de Health Check
         [HttpGet("")]
         
         public IActionResult Get()

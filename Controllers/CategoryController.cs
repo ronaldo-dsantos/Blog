@@ -26,39 +26,39 @@ namespace Blog.Controllers
         {
             try
             {
-                var categories = _cache.GetOrCreate("CategoriesCache", entry =>
+                var categories = await _cache.GetOrCreateAsync("CategoriesCache", async entry =>
                 {
                     entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
-                    return GetCategories();
+                    return await GetCategories();
                 });
 
                 return Ok(new ResultViewModel<List<Category>>(categories));
             }
             catch
             {
-                return StatusCode(500, new ResultViewModel<List<Category>>("05x04 - Falha interna no servidor"));
+                return StatusCode(500, new ResultViewModel<List<Category>>("05x00 - Falha interna no servidor"));
             }
         }
 
         [HttpGet("v1/categories/{id:int}")]
-        public async Task<IActionResult> GetByIdAsync(int id)
+        public async Task<IActionResult> GetByIdAsync([FromRoute] int id)
         {
             try
             {
-                var category = await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+                var category = await _context.Categories.FindAsync(id);
                 if (category == null)
-                    return NotFound(new ResultViewModel<Category>("Conteúdo não encontrado"));
+                    return NotFound(new ResultViewModel<Category>("05x01 - Categoria não encontrada"));
 
                 return Ok(new ResultViewModel<Category>(category));
             }
             catch
             {
-                return StatusCode(500, new ResultViewModel<Category>("05x05 - Falha interna no servidor"));
+                return StatusCode(500, new ResultViewModel<Category>("05x00 - Falha interna no servidor"));
             }
         }
 
         [HttpPost("v1/categories")]
-        public async Task<IActionResult> PostAsync(EditorCategoryViewModel model)
+        public async Task<IActionResult> PostAsync([FromBody] EditorCategoryViewModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new ResultViewModel<Category>(ModelState.GetErrors()));
@@ -74,6 +74,8 @@ namespace Blog.Controllers
                 await _context.Categories.AddAsync(category);
                 await _context.SaveChangesAsync();
 
+                _cache.Remove("CategoriesCache");
+
                 return Created($"/v1/categories/{category.Id}", new ResultViewModel<Category>(category));
             }
             catch (DbUpdateException)
@@ -82,27 +84,29 @@ namespace Blog.Controllers
             }
             catch
             {
-                return StatusCode(500, new ResultViewModel<Category>("05x10 - Falha interna no servidor"));
+                return StatusCode(500, new ResultViewModel<Category>("05x00 - Falha interna no servidor"));
             }
         }
 
         [HttpPut("v1/categories/{id:int}")]
-        public async Task<IActionResult> PutAsync(int id, EditorCategoryViewModel model)
+        public async Task<IActionResult> PutAsync([FromRoute] int id, [FromBody] EditorCategoryViewModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new ResultViewModel<Category>(ModelState.GetErrors()));
 
             try
             {
-                var category = await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+                var category = await _context.Categories.FindAsync(id);
                 if (category == null)
-                    return NotFound(new ResultViewModel<Category>("Conteúdo não encontrado"));
+                    return NotFound(new ResultViewModel<Category>("05x01 - Categoria não encontrada"));
 
                 category.Name = model.Name ?? string.Empty;
-                category.Slug = model.Slug ?? string.Empty;
+                category.Slug = model.Slug?.ToLower() ?? string.Empty;
 
                 _context.Categories.Update(category);
                 await _context.SaveChangesAsync();
+
+                _cache.Remove("CategoriesCache"); 
 
                 return Ok(new ResultViewModel<Category>(category));
             }
@@ -112,21 +116,23 @@ namespace Blog.Controllers
             }
             catch
             {
-                return StatusCode(500, new ResultViewModel<Category>("05x11 - Falha interna no servidor"));
+                return StatusCode(500, new ResultViewModel<Category>("05x00 - Falha interna no servidor"));
             }
         }
 
         [HttpDelete("v1/categories/{id:int}")]
-        public async Task<IActionResult> DeleteAsync(int id)
+        public async Task<IActionResult> DeleteAsync([FromRoute] int id)
         {
             try
             {
-                var category = await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+                var category = await _context.Categories.FindAsync(id);
                 if (category == null)
-                    return NotFound(new ResultViewModel<Category>("Conteúdo não encontrado"));
+                    return NotFound(new ResultViewModel<Category>("05x01 - Categoria não encontrada"));
 
                 _context.Categories.Remove(category);
                 await _context.SaveChangesAsync();
+
+                _cache.Remove("CategoriesCache");
 
                 return Ok(new ResultViewModel<Category>(category));
             }
@@ -136,14 +142,21 @@ namespace Blog.Controllers
             }
             catch
             {
-                return StatusCode(500, new ResultViewModel<Category>("05x12 - Falha interna no servidor"));
+                return StatusCode(500, new ResultViewModel<Category>("05x00 - Falha interna no servidor"));
             }
         }
 
-        private List<Category> GetCategories()
+        private async Task<List<Category>> GetCategories()
         {
-            return _context.Categories.ToList();    
+            return await _context.Categories
+                .AsNoTracking()
+                .Select(c => new Category
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Slug = c.Slug
+                })
+                .ToListAsync();
         }
     }
 }
-
