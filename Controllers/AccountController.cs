@@ -11,7 +11,8 @@ using SecureIdentity.Password;
 using System.Text.RegularExpressions;
 
 namespace Blog.Controllers
-{    [ApiController]
+{
+    [ApiController]
     public class AccountController : ControllerBase
     {
         private readonly TokenService _tokenService;
@@ -56,7 +57,7 @@ namespace Blog.Controllers
             }
             catch (DbUpdateException)
             {
-                return StatusCode(400, new ResultViewModel<string>("05x99 - Este e-mail já está cadastrado"));                
+                return StatusCode(400, new ResultViewModel<string>("05x99 - Este e-mail já está cadastrado"));
             }
             catch
             {
@@ -71,7 +72,7 @@ namespace Blog.Controllers
                 return BadRequest(new ResultViewModel<string>(ModelState.GetErrors()));
 
             var user = await _context.Users.AsNoTracking()
-                                           .Include(u =>u.Roles)
+                                           .Include(u => u.Roles)
                                            .FirstOrDefaultAsync(u => u.Email == loginViewModel.Email);
 
             if (user == null)
@@ -118,7 +119,7 @@ namespace Blog.Controllers
             try
             {
                 _context.Users.Update(user);
-                await _context.SaveChangesAsync();                
+                await _context.SaveChangesAsync();
             }
             catch
             {

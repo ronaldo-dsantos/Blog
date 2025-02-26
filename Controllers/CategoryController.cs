@@ -119,7 +119,7 @@ namespace Blog.Controllers
                 return StatusCode(500, new ResultViewModel<Category>("05x04 - Falha interna no servidor"));
             }
         }
-
+              
         [HttpDelete("v1/categories/{id:int}")]
         public async Task<IActionResult> DeleteAsync([FromRoute] int id)
         {
